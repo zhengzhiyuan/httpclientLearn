@@ -1,42 +1,63 @@
-package httpclientLearn.simple;
+package httpclientLearn.ssl;
 
 import java.nio.charset.CodingErrorAction;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Consts;
 import org.apache.http.client.CookieStore;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HttpClientPool {
+public final class SSLClientPool {
 
     private static enum SingletonPool {
-        Pool;
+        SSLPool;
         private final PoolingHttpClientConnectionManager cm;
         private final ScheduledExecutorService schedluedES = Executors.newScheduledThreadPool(1);
         private final Logger logger = LoggerFactory.getLogger(getClass());
 
-        private SingletonPool() {
+        private final SSLConnectionSocketFactory sslsf;
 
-            this.cm = init();
-            // 定时把过期链接清除
-            IdleConnectionMonitorThread monitor = new IdleConnectionMonitorThread(cm);
-            schedluedES.scheduleAtFixedRate(monitor, 0, 5, TimeUnit.SECONDS);
-            logger.info("{} init success", this);
+        private SingletonPool() {
+            try {
+                // 1 连接配置初始化
+                this.cm = init();
+
+                // 2 SSL配置初始化
+                this.sslsf = initSSL();
+
+                // 3 定时把过期链接清除
+                IdleConnectionMonitorThread monitor = new IdleConnectionMonitorThread(cm);
+                schedluedES.scheduleAtFixedRate(monitor, 0, 5, TimeUnit.SECONDS);
+                logger.info("{} init success", this);
+            } catch (Exception e) {
+                logger.error(this + " init exception", e);
+                throw new RuntimeException("", e);
+            }
         }
 
         /**
-         * 初始化连接配置
-         * 
+         * 连接配置初始化
+         *
          * @return
          */
         private PoolingHttpClientConnectionManager init() {
@@ -64,13 +85,31 @@ public final class HttpClientPool {
             // Configure the connection manager to use connection configuration either
             // by default or for a specific host.
             cm.setDefaultConnectionConfig(connectionConfig);
+
             return cm;
+        }
+
+        public SSLConnectionSocketFactory initSSL() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+            // 1 创建一个SSLContext
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    // TODO Auto-generated method stub
+                    return true;
+                }
+
+            }).build();
+            // 2 创建工厂SSLConnectionSocketFactory
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
+
+            return sslsf;
         }
 
         public CloseableHttpClient getHttpClient() {
             // Use custom cookie store if necessary.
             final CookieStore cookieStore = new BasicCookieStore();
-            return HttpClients.custom().setConnectionManager(cm).setDefaultCookieStore(cookieStore).build();
+            return HttpClients.custom().setConnectionManager(cm).setSSLSocketFactory(sslsf).setDefaultCookieStore(cookieStore).build();
         }
 
         public void shutdown() {
@@ -109,16 +148,11 @@ public final class HttpClientPool {
     }
 
     public static CloseableHttpClient getClient() {
-        return SingletonPool.Pool.getHttpClient();
+        return SingletonPool.SSLPool.getHttpClient();
     }
 
     public static void shutdown() {
-        SingletonPool.Pool.shutdown();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        HttpClientPool.getClient();
-        HttpClientPool.shutdown();
+        SingletonPool.SSLPool.shutdown();
     }
 
 }

@@ -1,4 +1,4 @@
-package httpclientLearn.simple;
+package httpclientLearn.dto;
 
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;

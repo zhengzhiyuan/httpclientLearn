@@ -1,6 +1,7 @@
-package httpclientLearn.simple;
+package httpclientLearn.ssl;
 
 import httpclientLearn.dto.HttpResult;
+import httpclientLearn.simple.HttpClientPool;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -24,15 +25,15 @@ import org.slf4j.LoggerFactory;
 
 import config.Constants;
 
-public class HttpClientHelper {
+public class HttpsClientHelper {
 
-    private static final HttpClientHelper instance = new HttpClientHelper();
+    private static final HttpsClientHelper instance = new HttpsClientHelper();
 
-    public static HttpClientHelper getInstance() {
+    public static HttpsClientHelper getInstance() {
         return instance;
     }
 
-    private HttpClientHelper() {
+    private HttpsClientHelper() {
     }
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -76,7 +77,7 @@ public class HttpClientHelper {
             }
         }
 
-        return parseRequest(HttpClientPool.getClient(), requestBuilder.build());
+        return parseRequest(SSLClientPool.getClient(), requestBuilder.build());
     }
 
     public HttpResult post(String uri) {
@@ -129,7 +130,7 @@ public class HttpClientHelper {
             }
         }
 
-        return parseRequest(HttpClientPool.getClient(), requestBuilder.build());
+        return parseRequest(SSLClientPool.getClient(), requestBuilder.build());
     }
 
     /**

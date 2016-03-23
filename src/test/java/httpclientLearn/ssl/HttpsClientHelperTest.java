@@ -1,4 +1,4 @@
-package httpclientLearn.simple;
+package httpclientLearn.ssl;
 
 import httpclientLearn.dto.HttpResult;
 
@@ -7,12 +7,12 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class HttpClientHelperTest {
+public class HttpsClientHelperTest {
 
     @Test
     public void test() {
 
-        HttpClientHelper helper = HttpClientHelper.getInstance();
+        HttpsClientHelper helper = HttpsClientHelper.getInstance();
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("wd", "test");
 
@@ -25,6 +25,6 @@ public class HttpClientHelperTest {
         System.out.println(postResulet);
 
         System.out.println("==================================");
-        HttpClientPool.shutdown();
+        SSLClientPool.shutdown();
     }
 }
