@@ -36,7 +36,7 @@ public final class HttpClientPool {
 
         /**
          * 初始化连接配置
-         * 
+         *
          * @return
          */
         private PoolingHttpClientConnectionManager init() {
@@ -91,20 +91,12 @@ public final class HttpClientPool {
 
         @Override
         public void run() {
-            try {
-                synchronized (cm) {
-                    wait(5000);
-                    // Close expired connections
-                    cm.closeExpiredConnections();
-                    // Optionally, close connections
-                    // that have been idle longer than 30 sec
-                    cm.closeIdleConnections(30, TimeUnit.SECONDS);
-                    logger.trace("Status: {}", cm.getTotalStats());
-                }
-            } catch (final InterruptedException ex) {
-                logger.error("Thread was interrupted by other thread", ex);
-            }
-
+            // Close expired connections
+            cm.closeExpiredConnections();
+            // Optionally, close connections
+            // that have been idle longer than 30 sec
+            cm.closeIdleConnections(30, TimeUnit.SECONDS);
+            logger.trace("Status: {}", cm.getTotalStats());
         }
     }
 
