@@ -89,8 +89,16 @@ public final class SSLClientPool {
             return cm;
         }
 
+        /**
+         * 初始化SSL参数
+         *
+         * @return
+         * @throws KeyManagementException
+         * @throws NoSuchAlgorithmException
+         * @throws KeyStoreException
+         */
         public SSLConnectionSocketFactory initSSL() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-            // 1 创建一个SSLContext
+            // 1 创建一个SSLContext——设置证书密码
             SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
 
                 @Override
@@ -100,7 +108,7 @@ public final class SSLClientPool {
                 }
 
             }).build();
-            // 2 创建工厂SSLConnectionSocketFactory
+            // 2 创建工厂SSLConnectionSocketFactory——设置协议
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
 
             return sslsf;
