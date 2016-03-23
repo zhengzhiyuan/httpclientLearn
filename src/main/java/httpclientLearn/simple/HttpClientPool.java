@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public final class HttpClientPool {
 
-    private static enum SingletonPool {
+    private  enum SingletonPool {
         Pool;
         private final PoolingHttpClientConnectionManager cm;
         private final ScheduledExecutorService schedluedES = Executors.newScheduledThreadPool(1);
@@ -74,7 +74,9 @@ public final class HttpClientPool {
         }
 
         public void shutdown() {
-            schedluedES.shutdownNow();
+        	if(!schedluedES.isShutdown()){
+        		schedluedES.shutdownNow();
+        	}
             cm.shutdown();
             logger.info("{} shutdown success", this);
         }
@@ -106,11 +108,6 @@ public final class HttpClientPool {
 
     public static void shutdown() {
         SingletonPool.Pool.shutdown();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        HttpClientPool.getClient();
-        HttpClientPool.shutdown();
     }
 
 }

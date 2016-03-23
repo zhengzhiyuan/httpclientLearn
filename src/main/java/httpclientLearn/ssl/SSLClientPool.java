@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public final class SSLClientPool {
 
-    private static enum SingletonPool {
+    private enum SingletonPool {
         SSLPool;
         private final PoolingHttpClientConnectionManager cm;
         private final ScheduledExecutorService schedluedES = Executors.newScheduledThreadPool(1);
@@ -121,7 +121,9 @@ public final class SSLClientPool {
         }
 
         public void shutdown() {
-            schedluedES.shutdownNow();
+        	if(!schedluedES.isShutdown()){
+        		schedluedES.shutdownNow();
+        	}
             cm.shutdown();
             logger.info("{} shutdown success", this);
         }
