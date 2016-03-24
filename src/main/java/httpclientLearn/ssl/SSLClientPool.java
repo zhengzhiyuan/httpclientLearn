@@ -121,9 +121,9 @@ public final class SSLClientPool {
         }
 
         public void shutdown() {
-        	if(!schedluedES.isShutdown()){
-        		schedluedES.shutdownNow();
-        	}
+            if (!schedluedES.isShutdown()) {
+                schedluedES.shutdownNow();
+            }
             cm.shutdown();
             logger.info("{} shutdown success", this);
         }

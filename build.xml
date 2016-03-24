@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="httpclientLearn" default="zip_all" basedir=".">
+	<description>
+        simple example build file 
+    </description>
+	<property name="app" value="httpclientLearn" />
+	<property name="dist" location="target" />
+	<target name="makedir">
+		<echo message="mkdir ${dist}/zip/${app}" />
+		<mkdir dir="${dist}/zip/${app}" />
+		<mkdir dir="${dist}/${app}" />
+	</target>
+	<target name="dist" depends="makedir" description="dist">
+		<copy todir="${dist}/zip/${app}">
+			<fileset dir="${dist}/${app}" />
+		</copy>
+	</target>
+	<target name="clean" description="clean up">
+		<!-- Delete ${dist}/zip directory trees -->
+		<echo message="delete ${dist}/zip/${app}" />
+		<delete dir="${dist}/zip" />
+	</target>
+
+	<target name="zip_clear" depends="clean,makedir">
+		<echo message="##########copy META-INF to dist!" />
+		<copy todir="${dist}/zip/${app}">
+			<fileset dir="${dist}/${app}">
+				<include  name="**/*.class"/>
+				
+				<!--
+				<include name="**/web.xml" />
+				<include name="**/*.jar" />
+				<include name="**/*.class" />
+				<include name="**/*.jar" />
+			  
+				 <exclude name="**/*.jar" />
+				<exclude name="**/*.jsp" />
+				<exclude name="**/*.sql" />    
+				<exclude name="**/*.xml"/> -->
+				<!--
+				<exclude name="**/*.properties"/>
+				<include name="**/*.class" />-->
+			</fileset>
+		</copy>
+	</target>
+	<target name="zip_all" depends="zip_clear">
+		<zip destfile="${dist}/zip/${app}.zip" basedir="${dist}/zip">
+		</zip>
+	</target>
+
+</project>
+
+
+
