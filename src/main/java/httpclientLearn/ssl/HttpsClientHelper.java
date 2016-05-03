@@ -54,7 +54,7 @@ public class HttpsClientHelper {
             throw new IllegalArgumentException("uri is required");
         }
 
-        RequestBuilder requestBuilder = RequestBuilder.post();
+        RequestBuilder requestBuilder = RequestBuilder.get();
         requestBuilder.setUri(uri);
 
         // Populate request parameters
