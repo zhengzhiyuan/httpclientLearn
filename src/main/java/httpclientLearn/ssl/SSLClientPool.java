@@ -11,19 +11,25 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.Consts;
 import org.apache.http.client.CookieStore;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.MessageConstraints;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +45,11 @@ public final class SSLClientPool {
 
         private SingletonPool() {
             try {
-                // 1 连接配置初始化
-                this.cm = init();
-
-                // 2 SSL配置初始化
+                // 1 SSL配置初始化
                 this.sslsf = initSSL();
+
+                // 2 连接配置初始化
+                this.cm = init();
 
                 // 3 定时把过期链接清除
                 IdleConnectionMonitorThread monitor = new IdleConnectionMonitorThread(cm);
@@ -61,8 +67,12 @@ public final class SSLClientPool {
          * @return
          */
         private PoolingHttpClientConnectionManager init() {
+
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create().register("https", sslsf).register("http", new PlainConnectionSocketFactory())
+                    .build();
+
             // Create a connection manager with custom configuration.
-            final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+            final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
             // Configure total max or per route limits for persistent connections
             // that can be kept in the pool or leased by the connection manager.
@@ -108,6 +118,23 @@ public final class SSLClientPool {
                 }
 
             }).build();
+
+//
+//            TrustManager tm = new X509TrustManager() {
+//
+//                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//                }
+//
+//                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//                }
+//
+//                public X509Certificate[] getAcceptedIssuers() {
+//                    return null;
+//                }
+//            };
+//
+//            sslContext.init(null, new TrustManager[]{ tm }, null);
+
             // 2 创建工厂SSLConnectionSocketFactory——设置协议
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
 

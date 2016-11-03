@@ -1,8 +1,5 @@
 package httpclientLearn.ssl;
 
-import httpclientLearn.dto.HttpResult;
-import httpclientLearn.simple.HttpClientPool;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -24,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import config.Constants;
+import httpclientLearn.dto.HttpResult;
 
 public class HttpsClientHelper {
 
@@ -147,7 +145,7 @@ public class HttpsClientHelper {
 
         final RequestBuilder requestBuilder = RequestBuilder.head();
         requestBuilder.setUri(uri);
-        return parseRequest(HttpClientPool.getClient(), requestBuilder.build());
+        return parseRequest(SSLClientPool.getClient(), requestBuilder.build());
     }
 
     private HttpResult parseRequest(CloseableHttpClient httpClient, HttpUriRequest request) {
