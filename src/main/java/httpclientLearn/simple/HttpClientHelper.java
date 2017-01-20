@@ -112,7 +112,6 @@ public class HttpClientHelper {
                 }
             }
         }
-
         // Populate request body
         if (body != null) {
             requestBuilder.setEntity(new ByteArrayEntity(body));
@@ -149,6 +148,13 @@ public class HttpClientHelper {
         return parseRequest(HttpClientPool.getClient(), requestBuilder.build());
     }
 
+    /**
+     * 将httpclient(连接)与请求方式结合
+     * 
+     * @param httpClient
+     * @param request
+     * @return
+     */
     private HttpResult parseRequest(CloseableHttpClient httpClient, HttpUriRequest request) {
         logger.debug("Executing request " + request.getURI());
 
